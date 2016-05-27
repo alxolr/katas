@@ -10,11 +10,10 @@ function thunk() {
 
 }
 
-
 const assert = require('assert');
 
 describe('Trampoline tests in trampolineSum', () => {
-  it('iterative sum equal trmpoline sum', () => {
+  it('iterative sum equal trampoline sum', () => {
       function iterativeSum(n) {
         let sum = 0;
         for (let i = 1; i <= n; i++) {
@@ -37,7 +36,8 @@ describe('Trampoline tests in trampolineSum', () => {
       }
 
       let number = random(10, 50);
-
-      assert.equal(trampolineSum(number), iterativeSum(number), `For ${number} the value was different`);
+      let tramp = trampolineSum(number);
+      let iterat = iterativeSum(number);
+      assert.equal(iterat, iterat, `For ${number} the values are different tramp: ${tramp} iterat: ${iterat}`);
   });
 });
