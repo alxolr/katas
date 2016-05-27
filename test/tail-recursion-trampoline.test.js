@@ -6,7 +6,7 @@ function trampoline() {
 
 }
 
-function thunk() {
+function thunk(...args) {
 
 }
 
@@ -22,7 +22,6 @@ describe('Trampoline tests in trampolineSum', () => {
 
         return sum;
       }
-
       function trampolineSum(n) {
         function _sum(n, ac) {
           if (n === 0) {
@@ -35,9 +34,10 @@ describe('Trampoline tests in trampolineSum', () => {
         return trampoline(thunk(_sum, n, 0));
       }
 
-      let number = random(10, 50);
-      let tramp = trampolineSum(number);
-      let iterat = iterativeSum(number);
+      let number = random(10, 50),
+        tramp = trampolineSum(number),
+        iterat = iterativeSum(number);
+
       assert.equal(iterat, iterat, `For ${number} the values are different tramp: ${tramp} iterat: ${iterat}`);
   });
 });
