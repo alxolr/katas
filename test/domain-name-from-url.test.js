@@ -2,7 +2,7 @@ const domainName = url => {
     let striped = url.replace(/http:\/\//g, '')
       .replace(/https:\/\//g, '')
       .replace(/www./g, '');
-    
+
     return /(.+?)\./g.exec(striped)[1];
   },
   assert = require('assert'),
