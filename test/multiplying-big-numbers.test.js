@@ -79,4 +79,5 @@ const BigNumbers = {
   }
 };
 
-let value = BigNumbers.pow("2", "3");
+let value = BigNumbers.pow("111", "2");
+console.log(value);
