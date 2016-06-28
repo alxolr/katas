@@ -12,7 +12,7 @@ function Coordinate(coordinate) {
 }
 
 Coordinate.prototype.toDeg = function() {
-  let result = this.coordinate.match(/([\d]{2})/g).map(item => parseInt(item))
+  let result = this.coordinate.match(/([\d]+)/g).map(item => parseInt(item))
     .reduce((acc, curr, index) => {
       if (index === 0) { //degree
         return acc + curr;
@@ -49,8 +49,8 @@ function distance(first, second) {
   lat2 = lat2.toRad();
   lon2 = lon2.toRad();
 
-  let dLat = lat2 - lat1;
   let dLon = lon2 - lon1;
+  let dLat = lat2 - lat1;
 
   let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1) * Math.cos(lat2) *
