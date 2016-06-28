@@ -53,6 +53,8 @@ function distance(first, second) {
   lat2 = lat2.toRad();
   lon2 = lon2.toRad();
 
+  console.log(lat2, lon2);
+
   let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1) * Math.cos(lat2) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
