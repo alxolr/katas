@@ -41,19 +41,16 @@ function distance(first, second) {
   lon1 = new Coordinate(lon1);
   lat2 = new Coordinate(lat2);
   lon2 = new Coordinate(lon2);
-  let R = 6371; // km
 
-  var x1 = lat2.toDeg() - lat1.toDeg();
-  var dLat = toRad(x1);
-  var x2 = lon2.toDeg() - lon1.toDeg();
-  var dLon = toRad(x2);
+  let R = 6371; // km
 
   lat1 = lat1.toRad();
   lon1 = lon1.toRad();
   lat2 = lat2.toRad();
   lon2 = lon2.toRad();
 
-  console.log(lat2, lon2);
+  let dLat = lat2 - lat1;
+  let dLon = lon2 - lon1;
 
   let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1) * Math.cos(lat2) *
