@@ -10,7 +10,6 @@ function dichotomySqrt(number) {
   let middle = (lowest + highest) / 2;
 
   while ((Math.abs(middle * middle - number)) > 0.0002) {
-    console.log(middle);
     let pow = middle * middle;
     if (pow > number) {
       highest = middle;
