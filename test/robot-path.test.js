@@ -1,5 +1,17 @@
 const assert = require('assert');
 
+class Node {
+  constructor() {
+    this.looking = "UP";
+    this.operations = "";
+    this.distance = 0;
+    this.children = [];
+    this.coordinates = [];
+  }
+}
+
+let head = new Node();
+
 class Robot {
   constructor(map) {
     this.map = map;
@@ -67,4 +79,4 @@ class Robot {
 }
 
 
-console.log(new Robot("S#..#...T").getMetaMatrix());
+// console.log(new Robot("S#..#...T").getMetaMatrix());
