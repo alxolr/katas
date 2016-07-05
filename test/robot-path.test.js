@@ -1,16 +1,13 @@
+/**
+ * WORKING LOG
+ * 1. Implement the graph with the vertexes for my needs
+ * http://www.thomaswilburn.net/typedefs/index.php/graph/weighted/weighted.html
+ * Implement a shortest path algorithm
+ *
+ */
+
 const assert = require('assert');
-
-class Node {
-  constructor() {
-    this.looking = "UP";
-    this.operations = "";
-    this.distance = 0;
-    this.children = [];
-    this.coordinates = [];
-  }
-}
-
-let head = new Node();
+const WeightedGraph = require('../modules/graphs');
 
 class Robot {
   constructor(map) {
@@ -79,4 +76,4 @@ class Robot {
 }
 
 
-// console.log(new Robot("S#..#...T").getMetaMatrix());
+console.log(new Robot("S#..#...T").getMetaMatrix());
