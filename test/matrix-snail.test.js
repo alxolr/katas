@@ -3,61 +3,67 @@
 
   const assert = require('assert');
 
-  function snail(matrix) {
-    let i = 0,
-      j = 0,
-      length = matrix[0].length,
-      path = [];
+  function snail(array) {
+    let width = array[0].length,
+      height = array.length,
+      row, index = 0,
+      result = [];
 
-    while (path.length < length * length) {
-      do {
-        console.log('test');
-        path.push(matrix[i][j]);
-        matrix[i][j] = 0;
-        j++;
-      } while (j < length && matrix[i][j] !== 0);
-
-      j--;
-      do {
-        path.push(matrix[i][j]);
-        matrix[i][j] = 0;
-        i++;
-      } while (i < length && matrix[i][j] !== 0);
-      i--;
-      do {
-        path.push(matrix[i][j]);
-        matrix[i][j] = 0;
-        j--;
-      } while (j >= 0 && matrix[i][j] !== 0);
-
-      i++;
-      do {
-        path.push(matrix[i][j]);
-        matrix[i][j] = 0;
-        i--;
-      } while (i >= 0 && matrix[i][j] !== 0);
-
-      i++;
+    while (array.length) {
+      row = array.shift();
+      while (row.length) {
+        result[index++] = row.shift();
+      }
+      array = transpose(array);
     }
 
-    return path;
+    return result;
+  }
+
+  function transpose(array) {
+
+    let column = array[0];
+    if (!column) return array;
+
+    let columns = column.length,
+      rows = array.length,
+      result = [];
+
+    let columnIndex,
+      resultColumnIndex,
+      rowIndex;
+
+    for (resultColumnIndex = 0, columnIndex = columns - 1; columnIndex >= 0; columnIndex--, resultColumnIndex++) {
+      result[resultColumnIndex] = new Array(rows);
+
+      for (rowIndex = 0; rowIndex < rows; rowIndex++) {
+        result[resultColumnIndex][rowIndex] = array[rowIndex][columnIndex];
+      }
+    }
+    return result;
   }
 
   const configs = [{
-    //   i: [[]],
-    //   o: []
-    // }, {
-    //   i: [[1]],
-    //   o: [1]
-    // },
+    i: [[]],
+    o: []
+   }, {
+    i: [[1]],
+    o: [1]
+   }, {
     i: [[1, 2], [3, 4]],
     o: [1, 2, 4, 3]
+     }, {
+    i: [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+    o: [1, 2, 3, 6, 9, 8, 7, 4, 5]
+   }, {
+    i: [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],
+    o: [1, 2, 3, 4, 8, 12, 16, 15, 14, 13, 9, 5, 6, 7, 11, 10]
   }];
 
   describe('Snail', () => {
     configs.forEach(config => {
       it(`should return ${config.o} given ${config.i}`, () => {
-        assert.equal(snail(config.i), config.o);
+        assert.deepEqual(snail(config.i), config.o);
       });
     });
   });
