@@ -52,5 +52,12 @@
         'john': 4
       });
     });
+
+    it('should replace the %20 from value to space', () => {
+      let query = 'var=myname%20is%20john';
+      assert.equal(convertQueryToMap(query), {
+        var: 'myname is john'
+      });
+    });
   });
 })();
