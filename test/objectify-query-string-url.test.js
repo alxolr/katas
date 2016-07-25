@@ -9,12 +9,12 @@
       let [key, value] = curr.split('=');
 
       if (!value) {
-        prev[key] = undefined;
+        prev[key] = '';
       } else {
         value = value.replace(/%20/g, ' ')
-                     .replace(/%26/g, '&')
-                     .replace(/%3D/g, '=')
-                     .replace(/%3F/g, '?');
+          .replace(/%26/g, '&')
+          .replace(/%3D/g, '=')
+          .replace(/%3F/g, '?');
 
         prev[key] = value;
       }
