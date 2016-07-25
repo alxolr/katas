@@ -7,16 +7,39 @@
   function convertQueryToMap(query) {
     let result = query.split('&').reduce((prev, curr) => {
       let [key, value] = curr.split('=');
+
       if (!value) {
-        prev[key] = '';
+        prev[key] = undefined;
       } else {
+        value = value.replace(/%20/g, ' ')
+                     .replace(/%26/g, '&')
+                     .replace(/%3D/g, '=')
+                     .replace(/%3F/g, '?');
+
         prev[key] = value;
       }
 
       return prev;
     }, {});
 
-    return result;
+
+    return deepen(result);
+  }
+
+  function deepen(o) {
+    var oo = {},
+      t, parts, part;
+    for (var k in o) {
+      t = oo;
+      parts = k.split('.');
+      var key = parts.pop();
+      while (parts.length) {
+        part = parts.shift();
+        t = t[part] = t[part] || {};
+      }
+      t[key] = o[k];
+    }
+    return oo;
   }
 
   let configs = [{
@@ -55,8 +78,18 @@
 
     it('should replace the %20 from value to space', () => {
       let query = 'var=myname%20is%20john';
-      assert.equal(convertQueryToMap(query), {
+      assert.deepEqual(convertQueryToMap(query), {
         var: 'myname is john'
+      });
+    });
+
+    it('should be able to make child values to an object', () => {
+      let query = 'user.name=John&user.surname=Dondon';
+      assert.deepEqual(convertQueryToMap(query), {
+        user: {
+          name: 'John',
+          surname: 'Dondon'
+        }
       });
     });
   });
