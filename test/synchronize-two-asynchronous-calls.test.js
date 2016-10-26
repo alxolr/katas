@@ -1,7 +1,8 @@
-const assert = require('assert');
+/* global describe it */
+const assert = require('assert')
 
-const firstCall = (cb) => setTimeout(() => cb(null, 'first'), 1000);
-const secondCall = (cb) => setTimeout(() => cb(null, 'second'), 1500);
+const firstCall = (cb) => setTimeout(() => cb(null, 'first'), 1000)
+const secondCall = (cb) => setTimeout(() => cb(null, 'second'), 1500)
 
 /**
  * Async method to synchronise more asynchronous codes
@@ -10,53 +11,55 @@ const secondCall = (cb) => setTimeout(() => cb(null, 'second'), 1500);
  */
 const Async = {
   parallel: (fns, cb) => {
-    let pending = 0,
-      result = [],
-      calledback = false;
+    let pending = 0
+    let result = []
+    let calledback = false
 
     const wrapCallback = () => {
-      let index = pending;
-      pending++;
-      return function(err, data) {
-        pending--;
+      let index = pending
+      pending++
+      return function (err, data) {
+        pending--
         if (err) {
-          callback(err);
+          callback(err)
         } else {
-          result[index] = data;
+          result[index] = data
           if (!pending) {
-            callback(null, result);
+            callback(null, result)
           }
         }
-      };
-    };
+      }
+    }
 
     const callback = (err, data) => {
-      if (err) cb(err);
+      if (err) cb(err)
 
       if (!calledback) {
-        calledback = true;
-        cb(null, data);
+        calledback = true
+        cb(null, data)
       }
-    };
+    }
 
-    fns.forEach(fn => fn(wrapCallback()));
+    fns.forEach(fn => fn(wrapCallback()))
   }
-};
+}
 
-describe('Async', function() {
-  describe('Parallel', function() {
-    it('should return the callback with the result of the methods', function(done) {
+describe('Async', function () {
+  describe('Parallel', function () {
+    it('should return the callback with the result of the methods', function (done) {
       Async.parallel([firstCall, secondCall], (err, data) => {
-        assert.deepEqual(data, ['first', 'second']);
-        done();
-      });
-    });
+        assert.equal(err, null)
+        assert.deepEqual(data, ['first', 'second'])
+        done()
+      })
+    })
 
-    it('should work with just one method also', function(done) {
+    it('should work with just one method also', function (done) {
       Async.parallel([firstCall], (err, data) => {
-        assert.deepEqual(data, ['first']);
-        done();
-      });
-    });
-  });
-});
+        assert.equal(err, null)
+        assert.deepEqual(data, ['first'])
+        done()
+      })
+    })
+  })
+})

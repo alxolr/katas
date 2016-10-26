@@ -1,25 +1,23 @@
-const assert = require('assert');
-
-function dichotomySqrt(number) {
-  let lowest = Math.floor(number / 2);
+function dichotomySqrt (number) {
+  let lowest = Math.floor(number / 2)
   while (lowest * lowest > number) {
-    lowest--;
+    lowest--
   }
 
-  let highest = lowest + 1;
-  let middle = (lowest + highest) / 2;
+  let highest = lowest + 1
+  let middle = (lowest + highest) / 2
 
   while ((Math.abs(middle * middle - number)) > 0.0002) {
-    let pow = middle * middle;
+    let pow = middle * middle
     if (pow > number) {
-      highest = middle;
+      highest = middle
     } else if (pow < number) {
-      lowest = middle;
+      lowest = middle
     }
-    middle = (lowest + highest) / 2;
+    middle = (lowest + highest) / 2
   }
 
-  return middle;
+  return middle
 }
 
-dichotomySqrt(379);
+dichotomySqrt(379)

@@ -1,71 +1,72 @@
+/* global describe it */
 (() => {
-  "use strict";
+  'use strict'
 
-  const assert = require('assert'),
-    configs = [{
-      i: "()",
-      o: true
-    }, {
-      i: ")(",
-      o: false
+  const assert = require('assert')
+  const configs = [{
+    i: '()',
+    o: true
   }, {
-      i: "{}",
-      o: true
+    i: ')(',
+    o: false
   }, {
-      i: "[{([])}]",
-      o: true
+    i: '{}',
+    o: true
   }, {
-      i: '(})',
-      o: false
-  }];
+    i: '[{([])}]',
+    o: true
+  }, {
+    i: '(})',
+    o: false
+  }]
 
-  function validBraces(string) {
-    let stack = [],
-      braces = string.split('');
+  function validBraces (string) {
+    let stack = []
+    let braces = string.split('')
 
     braces.forEach((bracket) => {
       if (stack.length === 0) {
-        stack.push(bracket);
+        stack.push(bracket)
       } else {
-        let current = stack[stack.length - 1];
+        let current = stack[stack.length - 1]
         switch (bracket) {
           case ')':
             if (current === '(') {
-              stack.pop();
+              stack.pop()
             } else {
-              stack.push(bracket);
+              stack.push(bracket)
             }
-            break;
+            break
           case ']':
             if (current === '[') {
-              stack.pop();
+              stack.pop()
             } else {
-              stack.push(bracket);
+              stack.push(bracket)
             }
-            break;
+            break
           case '}':
             if (current === '{') {
-              stack.pop();
+              stack.pop()
             } else {
-              stack.push(bracket);
+              stack.push(bracket)
             }
-            break;
+            break
           default:
-            stack.push(bracket);
+            stack.push(bracket)
         }
       }
-    });
+    })
 
-    if (stack.length > 0) return false;
+    if (stack.length > 0) return false
 
-    return true;
+    return true
   }
 
   describe('validBraces', () => {
     configs.forEach((config) => {
       it(`should return '${config.o}' given '${config.i}'`, () => {
-        assert.equal(validBraces(config.i), config.o);
-      });
-    });
-  });
-})();
+        assert.equal(validBraces(config.i), config.o)
+      })
+    })
+  })
+})()
