@@ -125,10 +125,10 @@ class Robot {
           if (metaMatrix[i][j] > distance) {
             metaMatrix[i][j] = distance
 
-            fill(distance + 1, i, j + 1)
-            fill(distance + 1, i + 1, j)
-            fill(distance + 1, i, j - 1)
-            fill(distance + 1, i - 1, j)
+            // fill(distance + 1, i, j + 1)
+            // fill(distance + 1, i + 1, j)
+            // fill(distance + 1, i, j - 1)
+            // fill(distance + 1, i - 1, j)
           }
         }
       } else {
@@ -195,6 +195,8 @@ class Robot {
     let metaMatrix = this.getMetaMatrix()
     let [x, y] = this.getStartCoordinates()
     let [i, j] = this.getTargetCoordinates()
+    if (metaMatrix[x][y] === 'SS') return []
+    if (metaMatrix[i][j] === 'TT') return []
 
     while (true) {
       road.push([i, j])
@@ -222,6 +224,7 @@ function getCommands (field, power) {
   let robot = new Robot(field)
   let path = []
   let road = robot.getOptimisedRoad()
+  if (!road.length) return ['']
   let [is, js] = road[0]
   for (let x = 1; x < road.length; x++) {
     let [i, j] = road[x]
@@ -284,13 +287,13 @@ const configs = [{
 }
 ]
 
-let robot = new Robot('S#.##...T')
-console.log(robot.getOptimisedRoad())
+let robot = new Robot('.........S......######............#.......######......T.........')
+console.log(robot.getTurnMatrix())
 
-// describe('getCommands', () => {
-//   configs.forEach(config => {
-//     it(`should return '${config.o}' given field '${config.i.f}' and power '${config.i.p}'`, () => {
-//       assert.deepEqual(getCommands(config.i.f, config.i.p), config.o)
-//     })
-//   })
-// })
+describe('getCommands', () => {
+  configs.forEach(config => {
+    it(`should return '${config.o}' given field '${config.i.f}' and power '${config.i.p}'`, () => {
+      assert.deepEqual(getCommands(config.i.f, config.i.p), config.o)
+    })
+  })
+})
