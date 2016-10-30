@@ -242,11 +242,9 @@ const getCommands = (field, power) => {
   let startCoordinates = getCoordinantes(matrix, 'S')
   let targetCoordinates = getCoordinantes(matrix, 'T')
   let map = getDistanceMap(matrix, startCoordinates)
-
   if (map[targetCoordinates[0]][targetCoordinates[1]] === 'T') { // there is no route
     return ['']
   }
-
   let turns = getTurnsMap(matrix, startCoordinates)
   let optimisedMap = getOptimisedMap(map, turns)
   let optimisedRoad = getOptimisedRoad(optimisedMap, targetCoordinates, startCoordinates)
@@ -284,10 +282,16 @@ const configs = [{
     p: 20
   },
   o: ['']
+}, {
+  i: {
+    f: '.........S......######............#.......######......T.........',
+    p: 100
+  },
+  o: 'rfffffrfflffffflffflfffff'.split('')
 }
 ]
 
-// console.log(getCommands('S#.##...T', 5))
+// console.log(getCommands('.........S......######............#.......######......T.........', 100).join(''))
 
 // let robot = new Robot('.........S......######............#.......######......T.........')
 // console.log(robot.getTurnMatrix())
