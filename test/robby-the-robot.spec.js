@@ -10,33 +10,30 @@
 
 const assert = require('assert')
 
-const getNext = (metaMatrix, i, j) => {
+const getNext = (matrix, i, j) => {
   let values = []
-  if (metaMatrix[i - 1] !== undefined && metaMatrix[i - 1][j] !== undefined) {
+  if (matrix[i - 1] !== undefined && matrix[i - 1][j] !== undefined) {
     values.push({
       xy: [i - 1, j],
-      value: metaMatrix[i - 1][j]
+      value: matrix[i - 1][j]
     })
   }
-
-  if (metaMatrix[i + 1] !== undefined && metaMatrix[i + 1][j] !== undefined) {
+  if (matrix[i + 1] !== undefined && matrix[i + 1][j] !== undefined) {
     values.push({
       xy: [i + 1, j],
-      value: metaMatrix[i + 1][j]
+      value: matrix[i + 1][j]
     })
   }
-
-  if (metaMatrix[i] !== undefined && metaMatrix[i][j + 1] !== undefined) {
+  if (matrix[i] !== undefined && matrix[i][j + 1] !== undefined) {
     values.push({
       xy: [i, j + 1],
-      value: metaMatrix[i][j + 1]
+      value: matrix[i][j + 1]
     })
   }
-
-  if (metaMatrix[i] !== undefined && metaMatrix[i][j - 1] !== undefined) {
+  if (matrix[i] !== undefined && matrix[i][j - 1] !== undefined) {
     values.push({
       xy: [i, j - 1],
-      value: metaMatrix[i][j - 1]
+      value: matrix[i][j - 1]
     })
   }
 
@@ -74,157 +71,139 @@ const getDirection = (location, direction) => {
   return rules[location][direction]
 }
 
-class Robot {
-  constructor (map) {
-    this.map = map
+const getMatrix = (map) => {
+  let side = Math.sqrt(map.length)
+  let matrix = []
+
+  for (let i = 0; i < side; i++) {
+    matrix.push(map.slice(side * i, side + side * i).split(''))
   }
 
-  toMatrix () {
-    let side = Math.sqrt(this.map.length)
-    let matrix = []
-    for (let i = 0; i < side; i++) {
-      matrix.push(this.map.slice(side * i, side + side * i).split(''))
-    }
-
-    return matrix
-  }
-
-  getStartCoordinates () {
-    let matrix = this.toMatrix()
-
-    for (let i = 0; i < matrix.length; i++) {
-      for (let j = 0; j < matrix.length; j++) {
-        if (matrix[i][j] === 'S') return [i, j]
-      }
-    }
-  }
-
-  getTargetCoordinates () {
-    let matrix = this.toMatrix()
-
-    for (let i = 0; i < matrix.length; i++) {
-      for (let j = 0; j < matrix.length; j++) {
-        if (matrix[i][j] === 'T') return [i, j]
-      }
-    }
-  }
-
-  getTopologicalMatrix () {
-    let metaMatrix = this.toMatrix()
-    let maxSide = metaMatrix.length
-
-    const fill = (distance, i, j) => {
-      if (i < maxSide && i >= 0 && j < maxSide && j >= 0 && metaMatrix[i][j] !== undefined) {
-        if ('S.T'.indexOf(metaMatrix[i][j]) !== -1) {
-          metaMatrix[i][j] = distance
-          fill(distance + 1, i, j + 1)
-          fill(distance + 1, i + 1, j)
-          fill(distance + 1, i, j - 1)
-          fill(distance + 1, i - 1, j)
-        } else {
-          if (metaMatrix[i][j] > distance) {
-            metaMatrix[i][j] = distance
-
-            // fill(distance + 1, i, j + 1)
-            // fill(distance + 1, i + 1, j)
-            // fill(distance + 1, i, j - 1)
-            // fill(distance + 1, i - 1, j)
-          }
-        }
-      } else {
-        return
-      }
-    }
-
-    fill(0, ...this.getStartCoordinates())
-
-    return metaMatrix
-  }
-
-  getTurnMatrix () {
-    let matrix = this.toMatrix()
-    let maxSide = matrix.length
-
-    const fill = (i, j, acc, location, direction) => {
-      if (i < maxSide && i >= 0 && j < maxSide && j >= 0 && matrix[i][j] !== undefined) {
-        if ('S.T'.indexOf(matrix[i][j]) !== -1) {
-          direction = getDirection(location, direction)
-          if (direction.length) {
-            location = direction[direction.length - 1]
-          }
-
-          matrix[i][j] = acc + direction.length
-          fill(i, j + 1, matrix[i][j], location, 'r')
-          fill(i + 1, j, matrix[i][j], location, 'd')
-          fill(i, j - 1, matrix[i][j], location, 'l')
-          fill(i - 1, j, matrix[i][j], location, 'u')
-        } else {
-          direction = getDirection(location, direction)
-          if (direction.length) {
-            location = direction[direction.length - 1]
-          }
-          let accumulator = acc + direction.length
-          if (matrix[i][j] > accumulator) {
-            matrix[i][j] = accumulator
-          }
-        }
-      } else {
-        return
-      }
-    }
-
-    fill(...this.getStartCoordinates(), 0, 'u', 'u')
-
-    return matrix
-  }
-
-  getMetaMatrix () {
-    let roads = this.getTopologicalMatrix()
-    let turns = this.getTurnMatrix()
-    for (let i = 0; i < roads.length; i++) {
-      for (let j = 0; j < roads[i].length; j++) {
-        roads[i][j] += turns[i][j]
-      }
-    }
-
-    return roads
-  }
-
-  getOptimisedRoad () {
-    let road = []
-    let metaMatrix = this.getMetaMatrix()
-    let [x, y] = this.getStartCoordinates()
-    let [i, j] = this.getTargetCoordinates()
-    if (metaMatrix[x][y] === 'SS') return []
-    if (metaMatrix[i][j] === 'TT') return []
-
-    while (true) {
-      road.push([i, j])
-      if (i === x) {
-        if (j === y) break
-      }
-      let values = getNext(metaMatrix, i, j).reduce((prev, curr) => {
-        if (prev.min > curr.value) {
-          prev.min = curr.value
-          prev.xy = curr.xy
-        }
-
-        return prev
-      }, { min: Infinity, xy: [] })
-
-      i = values.xy[0]
-      j = values.xy[1]
-    }
-
-    return road.reverse()
-  }
+  return matrix
 }
 
-function getCommands (field, power) {
-  let robot = new Robot(field)
+const getCoordinantes = (matrix, field) => {
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = 0; j < matrix.length; j++) {
+      if (matrix[i][j] === field) return [i, j]
+    }
+  }
+  return [null, null]
+}
+
+const getDistanceMap = (matrix, startCoordinates) => {
+  let side = matrix.length
+  let clone = JSON.parse(JSON.stringify(matrix))
+
+  function fill (distance, x, y) {
+    if (x < side && x >= 0 && y < side && y >= 0 && clone[x][y] !== undefined) {
+      if ('S.T'.indexOf(clone[x][y]) !== -1) {
+        clone[x][y] = distance
+        fill(distance + 1, x, y + 1)
+        fill(distance + 1, x, y - 1)
+        fill(distance + 1, x + 1, y)
+        fill(distance + 1, x - 1, y)
+      } else {
+        if (clone[x][y] > distance) {
+          clone[x][y] = distance
+          fill(distance + 1, x, y + 1)
+          fill(distance + 1, x, y - 1)
+          fill(distance + 1, x + 1, y)
+          fill(distance + 1, x - 1, y)
+        }
+      }
+    } else {
+      return
+    }
+  }
+  fill(0, ...startCoordinates)
+
+  return clone
+}
+
+const getTurnsMap = (matrix, startCoordinates) => {
+  let clone = JSON.parse(JSON.stringify(matrix)) // do not mutate original matrix
+  let side = matrix.length
+
+  function fill (turns, x, y, location, direction) {
+    if (x < side && x >= 0 && y < side && y >= 0 && clone[x][y] !== undefined) {
+      if ('S.T'.indexOf(clone[x][y]) !== -1) {
+        direction = getDirection(location, direction)
+        if (direction.length) {
+          location = direction.slice(-1)[0]
+        }
+        turns += direction.length
+        clone[x][y] = turns
+        fill(turns, x, y + 1, location, 'r')
+        fill(turns, x, y - 1, location, 'l')
+        fill(turns, x + 1, y, location, 'd')
+        fill(turns, x - 1, y, location, 'u')
+      } else {
+        direction = getDirection(location, direction)
+        if (direction.length) {
+          location = direction.slice(-1)[0]
+        }
+        turns += direction.length
+        if (clone[x][y] > turns) {
+          clone[x][y] = turns
+        } else {
+          return
+        }
+        fill(turns, x, y + 1, location, 'r')
+        fill(turns, x, y - 1, location, 'l')
+        fill(turns, x + 1, y, location, 'd')
+        fill(turns, x - 1, y, location, 'u')
+      }
+    } else {
+      return
+    }
+  }
+
+  fill(0, ...startCoordinates, 'u', 'u')
+
+  return clone
+}
+
+const getOptimisedMap = (roads, turns) => {
+  let roadsC = JSON.parse(JSON.stringify(roads))
+  let turnsC = JSON.parse(JSON.stringify(turns))
+
+  for (let i = 0; i < roadsC.length; i++) {
+    for (let j = 0; j < roadsC[i].length; j++) {
+      roadsC[i][j] += turnsC[i][j]
+    }
+  }
+
+  return roadsC
+}
+
+const getOptimisedRoad = (matrix, [i, j] , [x, y]) => {
+  let road = []
+  while (true) {
+    road.push([i, j])
+    if (i === x) {
+      if (j === y) break
+    }
+    let values = getNext(matrix, i, j).reduce((prev, curr) => {
+      if (prev.min > curr.value) {
+        prev.min = curr.value
+        prev.xy = curr.xy
+      }
+
+      return prev
+    }, { min: Infinity, xy: [] })
+
+    i = values.xy[0]
+    j = values.xy[1]
+  }
+
+  return road.reverse()
+}
+
+const getDirections = (road) => {
   let path = []
-  let road = robot.getOptimisedRoad()
   if (!road.length) return ['']
+
   let [is, js] = road[0]
   for (let x = 1; x < road.length; x++) {
     let [i, j] = road[x]
@@ -243,7 +222,11 @@ function getCommands (field, power) {
     }
   }
 
-  let energy = path.reduce((prev, curr) => {
+  return path
+}
+
+const resolveEnergy = (path) => {
+  return path.reduce((prev, curr) => {
     prev.resolved += getDirection(prev.location, curr).concat('f').join('')
     prev.location = curr
 
@@ -251,13 +234,30 @@ function getCommands (field, power) {
   }, {
     location: 'u',
     resolved: ''
-  })
+  }).resolved
+}
 
-  if (energy.resolved.length > power) {
+const getCommands = (field, power) => {
+  let matrix = getMatrix(field)
+  let startCoordinates = getCoordinantes(matrix, 'S')
+  let targetCoordinates = getCoordinantes(matrix, 'T')
+  let map = getDistanceMap(matrix, startCoordinates)
+
+  if (map[targetCoordinates[0]][targetCoordinates[1]] === 'T') { // there is no route
     return ['']
-  } else {
-    return energy.resolved.split('')
   }
+
+  let turns = getTurnsMap(matrix, startCoordinates)
+  let optimisedMap = getOptimisedMap(map, turns)
+  let optimisedRoad = getOptimisedRoad(optimisedMap, targetCoordinates, startCoordinates)
+  let path = getDirections(optimisedRoad)
+  let energy = resolveEnergy(path)
+
+  if (energy.length <= power) {
+    return energy.split('')
+  }
+
+  return ['']
 }
 
 const configs = [{
@@ -287,8 +287,10 @@ const configs = [{
 }
 ]
 
-let robot = new Robot('.........S......######............#.......######......T.........')
-console.log(robot.getTurnMatrix())
+// console.log(getCommands('S#.##...T', 5))
+
+// let robot = new Robot('.........S......######............#.......######......T.........')
+// console.log(robot.getTurnMatrix())
 
 describe('getCommands', () => {
   configs.forEach(config => {
