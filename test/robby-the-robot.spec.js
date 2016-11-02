@@ -1,14 +1,13 @@
 /**
  * WORKING LOG
- * 1. Implement the graph with the vertexes for my needs
- * http://www.thomaswilburn.net/typedefs/index.php/graph/weighted/weighted.html
- * Implement a shortest path algorithm
- *
+ * Change the recursive aproach to the BFS algorithm will give a better performance
  */
 
 /* global describe it */
 
 const assert = require('assert')
+let indexTy = 0
+
 
 const getNext = (matrix, i, j) => {
   let values = []
@@ -105,6 +104,7 @@ const getDistanceMap = (matrix, startCoordinates) => {
         fill(distance + 1, x - 1, y)
       } else {
         if (clone[x][y] > distance) {
+          indexTy++
           clone[x][y] = distance
           fill(distance + 1, x, y + 1)
           fill(distance + 1, x, y - 1)
@@ -120,7 +120,6 @@ const getDistanceMap = (matrix, startCoordinates) => {
 
   return clone
 }
-
 const getTurnsMap = (matrix, startCoordinates) => {
   let clone = JSON.parse(JSON.stringify(matrix)) // do not mutate original matrix
   let side = matrix.length
@@ -291,15 +290,11 @@ const configs = [{
 }
 ]
 
-// console.log(getCommands('.........S......######............#.......######......T.........', 100).join(''))
-
-// let robot = new Robot('.........S......######............#.......######......T.........')
-// console.log(robot.getTurnMatrix())
-
 describe('getCommands', () => {
   configs.forEach(config => {
     it(`should return '${config.o}' given field '${config.i.f}' and power '${config.i.p}'`, () => {
       assert.deepEqual(getCommands(config.i.f, config.i.p), config.o)
+      console.log(indexTy)
     })
   })
 })
