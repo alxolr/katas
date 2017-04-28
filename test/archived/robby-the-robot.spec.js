@@ -87,7 +87,7 @@ const getCoordinantes = (matrix, field) => {
       if (matrix[i][j] === field) return [i, j]
     }
   }
-  return [null, null]
+  return [null, null];
 }
 
 const getDistanceMap = (matrix, startCoordinates) => {
@@ -121,24 +121,24 @@ const getDistanceMap = (matrix, startCoordinates) => {
   return clone
 }
 const getTurnsMap = (matrix, startCoordinates) => {
-  let clone = JSON.parse(JSON.stringify(matrix)) // do not mutate original matrix
-  let side = matrix.length
+  let clone = JSON.parse(JSON.stringify(matrix)); // do not mutate original matrix
+  let side = matrix.length;
 
   function fill (turns, x, y, location, direction) {
     if (x < side && x >= 0 && y < side && y >= 0 && clone[x][y] !== undefined) {
       if ('S.T'.indexOf(clone[x][y]) !== -1) {
-        direction = getDirection(location, direction)
+        direction = getDirection(location, direction);
         if (direction.length) {
-          location = direction.slice(-1)[0]
+          location = direction.slice(-1)[0];
         }
-        turns += direction.length
-        clone[x][y] = turns
-        fill(turns, x, y + 1, location, 'r')
-        fill(turns, x, y - 1, location, 'l')
-        fill(turns, x + 1, y, location, 'd')
-        fill(turns, x - 1, y, location, 'u')
+        turns += direction.length;
+        clone[x][y] = turns;
+        fill(turns, x, y + 1, location, 'r');
+        fill(turns, x, y - 1, location, 'l');
+        fill(turns, x + 1, y, location, 'd');
+        fill(turns, x - 1, y, location, 'u');
       } else {
-        direction = getDirection(location, direction)
+        direction = getDirection(location, direction);
         if (direction.length) {
           location = direction.slice(-1)[0]
         }
