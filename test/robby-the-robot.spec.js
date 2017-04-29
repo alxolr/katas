@@ -3,13 +3,16 @@
  * Change the recursive approach to the BFS algorithm will give a better performance
  */
 
+// Create a special unique validation queue
+
 /* global describe it */
 
 const assert = require('assert');
 
-function Queue(nodes = []) {
+function Queue(nodes = [], fn) {
   this.nodes = nodes;
   this.length = nodes.length;
+  this.exists = fn;
 }
 
 Queue.prototype.dequeue = function dequeue() {
@@ -19,11 +22,16 @@ Queue.prototype.dequeue = function dequeue() {
   return node.pop();
 };
 
-Queue.prototype.enqueue = function enqueue(node) {
-  const exists = this
-    .nodes
-    .filter(curr => curr.pos === node.pos && curr.weight === node.weight)
+function inQueue(node) {
+  return this
+    .nodes.filter(item =>
+      Object.keys(item)
+        .reduce((isSame, property) => isSame && item[property] === node[property], true))
     .length;
+}
+
+Queue.prototype.enqueue = function enqueue(node) {
+  const exists = inQueue.call(this, node);
   if (!exists) {
     this.nodes.push(node);
     this.length = this.nodes.length;
@@ -40,6 +48,14 @@ function Turn(position, weight = 0, direction = 'u') {
   this.weight = weight;
   this.direction = direction;
 }
+
+function Move(position, direction, weight) {
+  this.position = position;
+  this.direction = direction;
+  this.weight = weight;
+}
+
+
 
 function calculateRouteCosts(field, power) {
   const length = Math.sqrt(field.length);
@@ -96,6 +112,75 @@ function getDirectionPath(location, direction) {
   return rules[location][direction];
 }
 
+function resolveEnergy(field, optimisedRoad) {
+  const length = Math.sqrt(field.length);
+  const start = field.indexOf('S');
+  const copy = Array.from(optimisedRoad);
+  let moves = '';
+  const finish = field.indexOf('T');
+
+  const queue = new Queue([new Move(start, 'u', 0)]);
+
+  while (queue.length) {
+    const move = queue.dequeue();
+    copy[move.position] = '*';
+    const position = move.position;
+    const candidates = [];
+
+    const up = position - length;
+    if (up >= 0 && copy[up] !== '*') {
+      candidates.push({
+        position: up,
+        direction: 'u',
+        weight: copy[up],
+      });
+    }
+
+    const down = position + length;
+    if (down < field.length && copy[down] !== '*') {
+      candidates.push({
+        position: down,
+        direction: 'd',
+        weight: copy[down],
+      });
+    }
+
+    const left = position - 1;
+    if (left > 0 && (position + 1) % length !== 1 && copy[left] !== '*') {
+      candidates.push({
+        position: left,
+        direction: 'l',
+        weight: copy[left],
+      });
+    }
+
+    const right = position + 1;
+    if (right < field.length && (position + 1) % length !== 0 && copy[right] !== '*') {
+      candidates.push({
+        position: right,
+        direction: 'r',
+        weight: copy[right],
+      });
+    }
+
+    const winner = candidates
+      .filter(item => item.weight > move.weight)
+      .sort((a, b) => {
+        if (a.weight > b.weight) return 1;
+        if (a.weight === b.weight) return 0;
+        if (a.weight < b.weight) return -1;
+      })[0];
+
+    moves = `${moves}${getDirectionPath(move.direction, winner.direction).join('')}f`;
+
+    if (winner.position === finish) break;
+
+    queue.enqueue(new Move(winner.position, winner.direction, winner.weight));
+  }
+
+  return moves;
+}
+
 function countTurns(from, to) {
   return getDirectionPath(from, to).length + 1;
 }
@@ -109,7 +194,7 @@ function calculateTurnCosts(field, power) {
   const queue = new Queue([new Turn(start)]);
 
   let iterations = 0;
-  while (iterations <= power && queue.length) {
+  while (iterations <= power * 2 && queue.length) {
     iterations += 1;
     const turn = queue.dequeue();
     const position = turn.position;
@@ -151,20 +236,15 @@ function getCommands(field, power) {
     const turnCosts = calculateTurnCosts(field, power);
 
     if (turnCosts[field.indexOf('T')] < Infinity) { // there is enough energy to the target
-      console.log(routeCosts);
-      console.log(turnCosts);
-      const optimisedMap = routeCosts.map((item, index) => item + turnCosts[index]);
-      
-      console.log(optimisedMap);
-
-      return ['f'];
+      const optimisedRoad = routeCosts.map((item, index) => item + turnCosts[index]);
+      return resolveEnergy(field, optimisedRoad).split('');
     }
   }
 
   return [''];
 }
 
-console.log(getCommands('S.......T', 10));
+getCommands('.........S......######............#.......######......T.........', 100);
 
 // const configs = [
 //   {
