@@ -85,9 +85,19 @@ function calculateRouteCosts(field, power) {
   return bfs;
 }
 
+function getDirectionPath(location, direction) {
+  const rules = {
+    u: { u: [], l: ['l'], d: ['r', 'r'], r: ['r'] },
+    l: { u: ['r'], l: [], d: ['l'], r: ['r', 'r'] },
+    d: { u: ['r', 'r', 'r'], l: ['l'], d: [], r: ['l'] },
+    r: { u: ['l'], l: ['l', 'l'], d: ['r'], r: [] },
+  };
+
+  return rules[location][direction];
+}
 
 function countTurns(from, to) {
-  return 2;
+  return getDirectionPath(from, to).length + 1;
 }
 
 function calculateTurnCosts(field, power) {
@@ -113,22 +123,22 @@ function calculateTurnCosts(field, power) {
 
     const up = position - length;
     if (up >= 0 && ~'.T'.indexOf(visited.charAt(up))) {
-      queue.enqueue(new Turn(up, turn.weight + countTurns(turn.position, 'u'), 'u'));
+      queue.enqueue(new Turn(up, turn.weight + countTurns(turn.direction, 'u'), 'u'));
     }
 
     const down = position + length;
     if (down < field.length && ~'.T'.indexOf(visited.charAt(down))) {
-      queue.enqueue(new Turn(down, turn.weight + countTurns(turn.position, 'd'), 'd'));
+      queue.enqueue(new Turn(down, turn.weight + countTurns(turn.direction, 'd'), 'd'));
     }
 
     const left = position - 1;
     if (left > 0 && (position + 1) % length !== 1 && ~'.T'.indexOf(visited.charAt(left))) {
-      queue.enqueue(new Turn(left, turn.weight + countTurns(turn.position, 'l'), 'l'));
+      queue.enqueue(new Turn(left, turn.weight + countTurns(turn.direction, 'l'), 'l'));
     }
 
     const right = position + 1;
     if (right < field.length && (position + 1) % length !== 0 && ~'.T'.indexOf(visited.charAt(right))) {
-      queue.enqueue(new Turn(right, turn.weight + countTurns(turn.position, 'r'), 'r'));
+      queue.enqueue(new Turn(right, turn.weight + countTurns(turn.direction, 'r'), 'r'));
     }
   }
 
@@ -141,7 +151,11 @@ function getCommands(field, power) {
     const turnCosts = calculateTurnCosts(field, power);
 
     if (turnCosts[field.indexOf('T')] < Infinity) { // there is enough energy to the target
-      const optimisedRoute = routeCosts.map((item, index) => item + turnCosts[index]);
+      console.log(routeCosts);
+      console.log(turnCosts);
+      const optimisedMap = routeCosts.map((item, index) => item + turnCosts[index]);
+      
+      console.log(optimisedMap);
 
       return ['f'];
     }
