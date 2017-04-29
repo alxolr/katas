@@ -35,28 +35,19 @@ function Node(pos, weight = 0) {
   this.weight = weight;
 }
 
-// function getDirections(from, to) {
-//   const rules = {
-//     u: { u: [], l: ['l'], d: ['r', 'r'], r: ['r'] },
-//     l: { u: ['r'], l: [], d: ['l'], r: ['r', 'r'] },
-//     d: { u: ['r', 'r', 'r'], l: ['l'], d: [], r: ['l'] },
-//     r: { u: ['l'], l: ['l', 'l'], d: ['r'], r: [] },
-//   };
-
-//   return rules[from][to];
-// }
-
-function getCommands(field, power) {
+function calculateRouteCosts(field, power) {
   const length = Math.sqrt(field.length);
   const start = field.indexOf('S');
   let visited = field;
 
   const bfs = new Array(field.length).fill(Infinity);
   const queue = new Queue([new Node(start, 0)]);
-
-  while (queue.length) {
+  let iterations = 0;
+  while (iterations <= power && queue.length) {
+    iterations += 1;
     const node = queue.dequeue();
-    const pos = node.pos;
+    if (!node) break;
+    const pos = node.pos || 0;
 
     if (~'S.T'.indexOf(visited.charAt(node.pos))) {
       if (bfs[pos] > node.weight) {
@@ -86,11 +77,16 @@ function getCommands(field, power) {
     }
   }
 
-  if (bfs[field.indexOf('T')] < Infinity) {
+  return bfs;
+}
 
-  } else {
-    return [''];
+function getCommands(field, power) {
+  const routeCosts = calculateRouteCosts(field, power);
+  if (routeCosts[field.indexOf('T')] < Infinity) { // there is no route to the target
+    return ['f'];
+  }
   
+  return [''];
 }
 
 console.log(getCommands('S#.##...T', 10));
