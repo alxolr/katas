@@ -11,8 +11,15 @@ Queue.prototype.dequeue = function dequeue() {
 };
 
 Queue.prototype.enqueue = function enqueue(node) {
-  this.nodes.push(node);
-  this.length = this.nodes.length;
+  const exists = this
+    .nodes
+    .filter(current => current.x === node.x &&
+      current.y === node.y && current.weight === node.weight).length;
+
+  if (!exists) {
+    this.nodes.push(node);
+    this.length = this.nodes.length;
+  }
 };
 
 module.exports = Queue;
