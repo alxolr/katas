@@ -35,6 +35,12 @@ function Node(pos, weight = 0) {
   this.weight = weight;
 }
 
+function Turn(position, weight = 0, direction = 'u') {
+  this.position = position;
+  this.weight = weight;
+  this.direction = direction;
+}
+
 function calculateRouteCosts(field, power) {
   const length = Math.sqrt(field.length);
   const start = field.indexOf('S');
@@ -46,8 +52,7 @@ function calculateRouteCosts(field, power) {
   while (iterations <= power && queue.length) {
     iterations += 1;
     const node = queue.dequeue();
-    if (!node) break;
-    const pos = node.pos || 0;
+    const pos = node.pos;
 
     if (~'S.T'.indexOf(visited.charAt(node.pos))) {
       if (bfs[pos] > node.weight) {
@@ -80,16 +85,72 @@ function calculateRouteCosts(field, power) {
   return bfs;
 }
 
+
+function countTurns(from, to) {
+  return 2;
+}
+
+function calculateTurnCosts(field, power) {
+  const length = Math.sqrt(field.length);
+  const start = field.indexOf('S');
+  let visited = field;
+
+  const bfs = new Array(field.length).fill(Infinity);
+  const queue = new Queue([new Turn(start)]);
+
+  let iterations = 0;
+  while (iterations <= power && queue.length) {
+    iterations += 1;
+    const turn = queue.dequeue();
+    const position = turn.position;
+
+    if (~'S.T'.indexOf(visited.charAt(turn.position))) {
+      if (bfs[position] > turn.weight) {
+        bfs[position] = turn.weight;
+        visited = `${visited.substr(0, position)}*${visited.substr(position + 1)}`;
+      }
+    }
+
+    const up = position - length;
+    if (up >= 0 && ~'.T'.indexOf(visited.charAt(up))) {
+      queue.enqueue(new Turn(up, turn.weight + countTurns(turn.position, 'u'), 'u'));
+    }
+
+    const down = position + length;
+    if (down < field.length && ~'.T'.indexOf(visited.charAt(down))) {
+      queue.enqueue(new Turn(down, turn.weight + countTurns(turn.position, 'd'), 'd'));
+    }
+
+    const left = position - 1;
+    if (left > 0 && (position + 1) % length !== 1 && ~'.T'.indexOf(visited.charAt(left))) {
+      queue.enqueue(new Turn(left, turn.weight + countTurns(turn.position, 'l'), 'l'));
+    }
+
+    const right = position + 1;
+    if (right < field.length && (position + 1) % length !== 0 && ~'.T'.indexOf(visited.charAt(right))) {
+      queue.enqueue(new Turn(right, turn.weight + countTurns(turn.position, 'r'), 'r'));
+    }
+  }
+
+  return bfs;
+}
+
 function getCommands(field, power) {
   const routeCosts = calculateRouteCosts(field, power);
-  if (routeCosts[field.indexOf('T')] < Infinity) { // there is no route to the target
-    return ['f'];
+  if (routeCosts[field.indexOf('T')] < Infinity) { // there is a route to the target
+    const turnCosts = calculateTurnCosts(field, power);
+
+    if (turnCosts[field.indexOf('T')] < Infinity) { // there is enough energy to the target
+      const optimisedRoute = routeCosts.map((item, index) => item + turnCosts[index]);
+
+      return ['f'];
+    }
   }
-  
+
   return [''];
 }
 
-console.log(getCommands('S#.##...T', 10));
+console.log(getCommands('S.......T', 10));
 
 // const configs = [
 //   {
