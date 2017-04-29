@@ -20,12 +20,18 @@ Queue.prototype.dequeue = function dequeue() {
 };
 
 Queue.prototype.enqueue = function enqueue(node) {
-  this.nodes.push(node);
-  this.length = this.nodes.length;
+  const exists = this
+    .nodes
+    .filter(curr => curr.pos === node.pos && curr.weight === node.weight)
+    .length;
+  if (!exists) {
+    this.nodes.push(node);
+    this.length = this.nodes.length;
+  }
 };
 
 function Node(pos, weight = 0) {
-  this.pos = x;
+  this.pos = pos;
   this.weight = weight;
 }
 
@@ -43,65 +49,98 @@ function Node(pos, weight = 0) {
 function getCommands(field, power) {
   const length = Math.sqrt(field.length);
   const start = field.indexOf('S');
+  let visited = field;
 
-  const bfs = field;
-  const queue = new Queue(new Node(start, 0));
+  const bfs = new Array(field.length).fill(Infinity);
+  const queue = new Queue([new Node(start, 0)]);
 
-  while(queue.length) {
-    if (~'S.T'.indexOf(bfs.charAt(node.pos)))
+  while (queue.length) {
+    const node = queue.dequeue();
+    const pos = node.pos;
+
+    if (~'S.T'.indexOf(visited.charAt(node.pos))) {
+      if (bfs[pos] > node.weight) {
+        bfs[pos] = node.weight;
+        visited = `${visited.substr(0, pos)}*${visited.substr(pos + 1)}`;
+      }
+    }
+
+    const up = pos - length;
+    if (up >= 0 && ~'.T'.indexOf(visited.charAt(up))) {
+      queue.enqueue(new Node(up, node.weight + 1));
+    }
+
+    const down = pos + length;
+    if (down < field.length && ~'.T'.indexOf(visited.charAt(down))) {
+      queue.enqueue(new Node(down, node.weight + 1));
+    }
+
+    const left = pos - 1;
+    if (left > 0 && (pos + 1) % length !== 1 && ~'.T'.indexOf(visited.charAt(left))) {
+      queue.enqueue(new Node(left, node.weight + 1));
+    }
+
+    const right = pos + 1;
+    if (right < field.length && (pos + 1) % length !== 0 && ~'.T'.indexOf(visited.charAt(right))) {
+      queue.enqueue(new Node(right, node.weight + 1));
+    }
   }
 
-  return ''.split('');
+  if (bfs[field.indexOf('T')] < Infinity) {
+
+  } else {
+    return [''];
+  
 }
 
-// getCommands('S.......T', 10);
+console.log(getCommands('S#.##...T', 10));
 
-const configs = [
-  {
-    i: {
-      f: 'T.S.',
-      p: 10,
-    },
-    o: 'f',
-  },
-  {
-    i: {
-      f: 'S.......T',
-      p: 10,
-    },
-    o: 'rffrff',
-  },
-  {
-    i: {
-      f: 'S.......T',
-      p: 5,
-    },
-    o: '',
-  }, {
-    i: {
-      f: 'S#.##...T',
-      p: 20,
-    },
-    o: '',
-  }, {
-    i: {
-      f: '.........S......######............#.......######......T.........',
-      p: 100,
-    },
-    o: 'rfffffrfflffffflffflfffff',
-  }, {
-    i: {
-      f: '................................................................###########.........#.........#.........#.#######.#.........#.#.......#.........#.#.#######.........#.#.#S.#............#.#.##.#............#.#....#............#.######............#...................###############........................................................................................................................T',
-      p: 400,
-    },
-    o: 'rfrfflfffrffffrfffffflfflfffffffflfffffffflffffffffffffffrfffffff',
-  },
-];
+// const configs = [
+//   {
+//     i: {
+//       f: 'T.S.',
+//       p: 10,
+//     },
+//     o: 'f',
+//   },
+//   {
+//     i: {
+//       f: 'S.......T',
+//       p: 10,
+//     },
+//     o: 'rffrff',
+//   },
+//   {
+//     i: {
+//       f: 'S.......T',
+//       p: 5,
+//     },
+//     o: '',
+//   }, {
+//     i: {
+//       f: 'S#.##...T',
+//       p: 20,
+//     },
+//     o: '',
+//   }, {
+//     i: {
+//       f: '.........S......######............#.......######......T.........',
+//       p: 100,
+//     },
+//     o: 'rfffffrfflffffflffflfffff',
+//   }, {
+//     i: {
+//       f: '................................................................###########.........#.........#.........#.#######.#.........#.#.......#.........#.#.#######.........#.#.#S.#............#.#.##.#............#.#....#............#.######............#...................###############........................................................................................................................T',
+//       p: 400,
+//     },
+//     o: 'rfrfflfffrffffrfffffflfflfffffffflfffffffflffffffffffffffrfffffff',
+//   },
+// ];
 
-describe('getCommands', () => {
-  configs.forEach((config) => {
-    it(`should return '${config.o}' given field '${config.i.f}' and power '${config.i.p}'`, () => {
-      assert.deepEqual(getCommands(config.i.f, config.i.p).join(''), config.o);
-    });
-  });
-});
+// describe('getCommands', () => {
+//   configs.forEach((config) => {
+//     it(`should return '${config.o}' given field '${config.i.f}' and power '${config.i.p}'`, () => {
+//       assert.deepEqual(getCommands(config.i.f, config.i.p).join(''), config.o);
+//     });
+//   });
+// });
